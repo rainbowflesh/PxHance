@@ -1,12 +1,15 @@
 // ==UserScript==
 // @name         PxHance
 // @namespace    https://pixiv.net/
-// @version      1.0.1
+// @version      1.0.0
 // @description  Hover Pixiv thumbnails to show a zoomed preview, scroll to view multiple pages, with single/all download options inside the blurred container. Click image to go to artwork page.
 // @match        https://www.pixiv.net/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=pixiv.net
 // @grant        GM_addStyle
 // @grant        GM_download
+// @grant        GM_registerMenuCommand
+// @grant        GM_setValue
+// @grant        GM_getValue
 // @run-at       document-start
 // ==/UserScript==
 
@@ -14,11 +17,63 @@
   // biome-ignore lint/suspicious/noRedundantUseStrict: <explanation>
   "use strict";
 
-  const DEBUG = true;
-  const HOVER_DELAY = 60;
-  const LEAVE_DELAY = 140;
-  const ZOOM_SCALE = 1.8;
-  const DOWNLOAD_DELAY = 300;
+  const DEBUG = false;
+
+  const DEFAULTS = {
+    HOVER_DELAY: 160,
+    LEAVE_DELAY: 140,
+    ZOOM_SCALE: 2.5,
+    DOWNLOAD_DELAY: 300,
+  };
+
+  // load config
+  const CONFIG = {
+    HOVER_DELAY: GM_getValue("HOVER_DELAY", DEFAULTS.HOVER_DELAY),
+    LEAVE_DELAY: GM_getValue("LEAVE_DELAY", DEFAULTS.LEAVE_DELAY),
+    ZOOM_SCALE: GM_getValue("ZOOM_SCALE", DEFAULTS.ZOOM_SCALE),
+    DOWNLOAD_DELAY: GM_getValue("DOWNLOAD_DELAY", DEFAULTS.DOWNLOAD_DELAY),
+  };
+
+  function registerMenu() {
+    GM_registerMenuCommand("Set Hover Delay", () => {
+      const val = prompt("Hover Delay (ms):", CONFIG.HOVER_DELAY);
+      if (val !== null) {
+        GM_setValue("HOVER_DELAY", Number(val));
+        location.reload();
+      }
+    });
+
+    GM_registerMenuCommand("Set Leave Delay", () => {
+      const val = prompt("Leave Delay (ms):", CONFIG.LEAVE_DELAY);
+      if (val !== null) {
+        GM_setValue("LEAVE_DELAY", Number(val));
+        location.reload();
+      }
+    });
+
+    GM_registerMenuCommand("Set Zoom Scale", () => {
+      const val = prompt("Zoom Scale:", CONFIG.ZOOM_SCALE);
+      if (val !== null) {
+        GM_setValue("ZOOM_SCALE", Number(val));
+        location.reload();
+      }
+    });
+
+    GM_registerMenuCommand("Set Download Delay", () => {
+      const val = prompt("Download Delay (ms):", CONFIG.DOWNLOAD_DELAY);
+      if (val !== null) {
+        GM_setValue("DOWNLOAD_DELAY", Number(val));
+        location.reload();
+      }
+    });
+
+    GM_registerMenuCommand("Reset Defaults", () => {
+      Object.keys(DEFAULTS).forEach((k) => GM_setValue(k, DEFAULTS[k]));
+      location.reload();
+    });
+  }
+
+  registerMenu();
 
   let hoverTimer = null;
   let leaveTimer = null;
@@ -276,11 +331,11 @@
 
   function positionElements(layer, rect) {
     const w = Math.min(
-      Math.max(Math.round(rect.width * ZOOM_SCALE), 300),
+      Math.max(Math.round(rect.width * CONFIG.ZOOM_SCALE), 300),
       window.innerWidth - 16,
     );
     const h = Math.min(
-      Math.max(Math.round(rect.height * ZOOM_SCALE), 300),
+      Math.max(Math.round(rect.height * CONFIG.ZOOM_SCALE), 300),
       window.innerHeight - 16,
     );
 
@@ -370,7 +425,7 @@
       }
     };
     const setLeave = () => {
-      leaveTimer = setTimeout(() => removeActive(), LEAVE_DELAY);
+      leaveTimer = setTimeout(() => removeActive(), CONFIG.LEAVE_DELAY);
     };
 
     els.layer.addEventListener("pointerenter", keepAlive);
@@ -419,7 +474,7 @@
       for (let i = 0; i < active.urls.length; i++) {
         executeDownload(active.urls[i], active.illustId, i);
         if (i < active.urls.length - 1) {
-          await new Promise((r) => setTimeout(r, DOWNLOAD_DELAY));
+          await new Promise((r) => setTimeout(r, CONFIG.DOWNLOAD_DELAY));
         }
       }
     });
@@ -446,7 +501,7 @@
 
   function scheduleShow(img) {
     if (hoverTimer) clearTimeout(hoverTimer);
-    hoverTimer = setTimeout(() => showPreview(img), HOVER_DELAY);
+    hoverTimer = setTimeout(() => showPreview(img), CONFIG.HOVER_DELAY);
   }
 
   function bindGlobalEvents() {
@@ -482,7 +537,7 @@
           hoverTimer = null;
         }
         if (leaveTimer) clearTimeout(leaveTimer);
-        leaveTimer = setTimeout(() => removeActive(), LEAVE_DELAY);
+        leaveTimer = setTimeout(() => removeActive(), CONFIG.LEAVE_DELAY);
       },
       true,
     );
