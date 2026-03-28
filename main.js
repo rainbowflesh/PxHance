@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         PxHance
 // @namespace    https://pixiv.net/
-// @version      1.0.0
+// @version      1.0.1
 // @description  Hover Pixiv thumbnails to show a zoomed preview, scroll to view multiple pages, with single/all download options inside the blurred container. Click image to go to artwork page.
 // @match        https://www.pixiv.net/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=pixiv.net
 // @grant        GM_addStyle
 // @grant        GM_download
 // @run-at       document-start
@@ -99,7 +100,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      background: rgba(20, 20, 20, 0.85);
+      background: rgba(20, 20, 20, 0.35);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,0.18);
       border-radius: 8px;
@@ -249,11 +250,11 @@
 
     const btnCurrent = document.createElement("button");
     btnCurrent.className = "px-btn";
-    btnCurrent.textContent = "下载这张";
+    btnCurrent.textContent = "⬇️";
 
     const btnAll = document.createElement("button");
     btnAll.className = "px-btn";
-    btnAll.textContent = "下载全部";
+    btnAll.textContent = "⬇️⬇️⬇️";
 
     controls.appendChild(pageInd);
     controls.appendChild(btnCurrent);
