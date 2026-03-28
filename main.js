@@ -11,6 +11,7 @@
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @run-at       document-start
+// @license MIT
 // ==/UserScript==
 
 (() => {
